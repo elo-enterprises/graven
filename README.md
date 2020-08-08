@@ -40,7 +40,9 @@ See also:
 
 ## Requirements
 
-Graven requires modern linux including [losetup](https://www.linux.org/docs/man8/losetup.html) and friends, plus root.  (Root is required because for some distros, non-root members of the `disk` group may still have trouble with mount & umount.. YMMV)
+Graven requires modern linux including [losetup](https://www.linux.org/docs/man8/losetup.html) and friends, plus root.
+
+Root is required because for some distros, non-root members of the `disk` group may still have trouble with mount & umount.. YMMV
 
 ## Installation
 
@@ -49,6 +51,9 @@ pip install -e git+ssh://git@github.com/elo-enterprises/graven@master#egg=graven
 ```
 
 ## Example Usage
+
+```
+$ graven --help
 
 Usage: graven [OPTIONS] COMMAND [ARGS]...
 
@@ -77,10 +82,13 @@ Commands:
   st        ALIAS for `status`
   stat      ALIAS for `status`
   u         ALIAS for `umount`
+```
 
 ## Development Notes
 
-Note that usage generally requires root, so if you're doing development or you just prefer to install to a virtualenv owned by your normal user, this is a useful way to invoke graven:
+**Building Documentation:** This documentation, with the latest command line help, is built using `make docs`.
+
+**Invocation for developers:** Note that usage generally requires root, so if you're doing development or you just prefer to install to a virtualenv owned by your normal user, this is a useful way to invoke graven:
 
 ```
 user@host[virtualenv]$ sudo `which graven` ...graven subcommands...
