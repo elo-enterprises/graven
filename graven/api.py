@@ -1,7 +1,9 @@
 """ graven.api
 """
 
-import os, sys, time
+import os
+import sys
+import time
 import functools
 from collections import defaultdict
 
@@ -44,6 +46,7 @@ def flash(src_path=None, dest_path=None, debug=None, force=None, dry_run=None, b
     actions = []
     assert not (force and dry_run), 'cant use `force` and `dry-run` at the same time!'
     result = dict(src=src_path, dest=dest_path, error=error, actions=actions)
+
     def doit():
         if dry_run:
             result['error'] = 'DRY_RUN'
@@ -65,7 +68,7 @@ def flash(src_path=None, dest_path=None, debug=None, force=None, dry_run=None, b
             # action = dict(flash=dict(
             #         dest=dest_path, src=src_path,
             #         error=True, status=tmp.stderr.strip(),))
-        result['actions'] += [ action ]
+        result['actions'] += [action]
         return result
     if os.path.isdir(dest_path):
         msg = 'Cannot use an existing directory for `dest_path`'
@@ -119,14 +122,14 @@ def umount(img=None, all=False, partition=None, simple=False,**kargs) -> list:
 
     if img and not util.is_string(img) and len(img) > 0:
         LOGGER.debug("unmounting multiple images: {}".format(img))
-        return [ umount(x) for x in img ]
+        return [umount(x) for x in img]
     elif not img:
         if not all:
             raise RuntimeError('expected an image or --all flag')
         else:
             LOGGER.debug(".. detected --all flag")
             st = status()
-            actions = [ umount(img,simple=True) for img in st['images']['mounted'] ]
+            actions = [umount(img,simple=True) for img in st['images']['mounted']]
             import functools
             actions = functools.reduce(lambda x,y: x+y, actions, [])
             return dict(error=has_err(actions), actions=actions)
@@ -137,23 +140,25 @@ def umount(img=None, all=False, partition=None, simple=False,**kargs) -> list:
         for dev in devices:
             actions.append(util.umount(dev))
             actions.append(util.detach(dev))
-        if simple: return actions
+        if simple:
+            return actions
         return dict(error=has_err(actions), actions=actions)
     else:
-        import IPython; IPython.embed()
+        import IPython
+        IPython.embed()
         raise Exception('niy')
 
 def mount_all(img=None, mountpoint=None, debug=None):
     """ """
     assert not mountpoint
-    x = util.mount_info(img);
+    x = util.mount_info(img)
     any_lodev = list(x['devices'].keys())[0]
     part_devs = x['devices'][any_lodev]['partition_devices']
     # need 1 or 2, not /dev/loop33p2
-    part_enum = [ _[_.rfind('p') + 1 : ] for _ in part_devs ]
-    [ mount(
-        img=img, partition=p, debug=debug) \
-        for p in part_enum ]
+    part_enum = [_[_.rfind('p') + 1:] for _ in part_devs]
+    [mount(
+        img=img, partition=p, debug=debug)
+        for p in part_enum]
 
 def mount(img, mountpoint=None, all=False, partition='1', debug=False, **kargs):
     """
@@ -190,7 +195,7 @@ def mount(img, mountpoint=None, all=False, partition='1', debug=False, **kargs):
                     # return dict(mounts=collisions)
                     return status()['images']['mounted'][img]
 
-            msg = "{} is not mounted yet." #, will be mounted to {}"
+            msg = "{} is not mounted yet."  # , will be mounted to {}"
             LOGGER.debug(msg.format(lodev))
             util.mount(lodev, partition, mdir)
             return status()['images']['mounted']
@@ -281,7 +286,7 @@ def versions(**kargs):
         graven='.1',
         losetup=losetup_version,
         pyparted='.'.join([
-            str(x) for x in tmp["pyparted"]]) \
+            str(x) for x in tmp["pyparted"]])
             if tmp["pyparted"] else tmp["pyparted"],
         libparted=tmp["libparted"])
 
@@ -325,7 +330,7 @@ def ls(img=None, **kargs):
             human=dict(
                 size=sizeof_fmt(st_size),
             )))
-    return { os.path.abspath(img): out }
+    return {os.path.abspath(img): out}
 
 def split(img, **kargs):
     """

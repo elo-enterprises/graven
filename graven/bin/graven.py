@@ -17,7 +17,7 @@ def entry(*args, **kargs):
     Tool for working with images.
     For more detail, use --help on subcommands.
     """
-    if not os.geteuid()==0:
+    if not os.geteuid() == 0:
         LOGGER.error("this tool requires root!")
         raise SystemExit(1)
     pass

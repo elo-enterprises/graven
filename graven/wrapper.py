@@ -27,7 +27,7 @@ class ApiWrapper(abcs.Loggable):
 
     def __init__(self, command_name=None, publishers=[], subcommand_name=None, fxn=None, extra_options=None, aliases=[], help=None, entry=None):
         self.entry = entry
-        self.aliases=aliases
+        self.aliases = aliases
         self.is_subcommand = isinstance(self.entry, (click.core.Group,))
         self.is_stand_alone = self.entry is None
         self.subcommand_name = self.name = subcommand_name or \
@@ -37,18 +37,18 @@ class ApiWrapper(abcs.Loggable):
         self.fxn.publishers = getattr(self.fxn,'publishers', publishers)
         self.extra_options = extra_options
         default_help = 'no docstring'
-        self.help = help or getattr(fxn, '__doc__', default_help)  or default_help
+        self.help = help or getattr(fxn, '__doc__', default_help) or default_help
         self.help = self.help.strip()
         self.proxy = self.get_proxy()
         if not callable(self.proxy):
             err = "Expected callable for proxy, got '{}'".format(self.proxy)
             raise ValueError(err)
         if not (self.is_subcommand or self.is_stand_alone):
-             err = (
-                'expected a group or a standalone '
-                'command, got {} of type {} for entry')
-             err = err.format(self.entry, type(self.entry))
-             raise ValueError(err)
+            err = (
+               'expected a group or a standalone '
+               'command, got {} of type {} for entry')
+            err = err.format(self.entry, type(self.entry))
+            raise ValueError(err)
         super(ApiWrapper, self).__init__()
 
     def get_proxy(self):
@@ -64,7 +64,7 @@ class ApiWrapper(abcs.Loggable):
             # if args and isinstance(args[0],(click.core.Context,)):
             #     # none of the api commands are anticipating the click context
             #     args = args[1:]
-            args = [ x for x in args if not isinstance(x,(click.core.Context,))]
+            args = [x for x in args if not isinstance(x,(click.core.Context,))]
             os.environ.get('DEBUG') and LOGGER.debug("proxying args={}, kwargs={}".format(args, kwargs))
             api_result = self.fxn(*args, **kwargs)
             if not isinstance(api_result, (dict, list)):

@@ -11,6 +11,7 @@ class Loggable(object):
     a mixin that allows subclassers to call things like
     self.logger.debug(..) etc with no hassle
     """
+
     def __init__(self, name=None, **kwargs):
         if hasattr(self, 'logger'):
             return

@@ -93,12 +93,13 @@ def invoke(cmd=None, stdin='', interactive=False, large_output=False, log_comman
     if system:
         assert not stdin and not interactive
         error = os.system(cmd)
+
         class result(object):
             failed = failure = bool(error)
             success = succeeded = not bool(error)
             stdout = stdin = '<os.system>'
         return result
-    env_string = [ "{}='{}'".format(k, v) for k,v in environment.items() ]
+    env_string = ["{}='{}'".format(k, v) for k,v in environment.items()]
     env_string = ' '.join(env_string)
     cmd = "{} {}".format(env_string, cmd)
     exec_kwargs = dict(shell=True, )
@@ -183,7 +184,7 @@ def get_mounted_images(debug=False) -> dict:
     chan = LOGGER.debug if debug else (lambda *args: None)
     chan("managed mounts dir is: {}".format(managed_mounts_dir))
     alleged = invoke('ls {}'.format(managed_mounts_dir)).stdout.split('\n')
-    alleged = [ _.strip() for _ in alleged  if _.strip()]
+    alleged = [_.strip() for _ in alleged if _.strip()]
     out = {}
     for mp in alleged:
         cmd = invoke('mount | grep {}'.format(mp))
@@ -192,7 +193,7 @@ def get_mounted_images(debug=False) -> dict:
             lodev_p = cmd.stdout.strip().split()[0]
             lodev = lodev_p[:lodev_p.rfind('p')]
             devs = json.loads(invoke('losetup --json --list').stdout)
-            matches = [ x for x in devs['loopdevices'] if x['name']==lodev]
+            matches = [x for x in devs['loopdevices'] if x['name'] == lodev]
             for m in matches:
                 m_lodev = m['name']
                 m_img = m['back-file']
@@ -256,7 +257,7 @@ def _clean_dev_name(dev:str):
     # /sys/block/sda/device/device_busy
     # LOGGER.debug("Checking if {} is removable..".format({}))
     if dev.startswith('/dev/'):
-        dev=dev.replace('/dev/', '')
+        dev = dev.replace('/dev/', '')
     return dev
 
 def assert_removable(dev:str):
@@ -288,12 +289,12 @@ def mount_info(img=None, debug=False, **kargs) -> dict:
     cmd = "losetup -a | grep {}"
     tmp = invoke(cmd.format(img), log_command=debug)
     lines = tmp.stdout.split('\n')
-    devices = [ x.split(':')[0] for x in lines if x.strip() ]
+    devices = [x.split(':')[0] for x in lines if x.strip()]
     devices = dict(
-        [ [x, dict(
+        [[x, dict(
             partition_devices=find_partition_devs(x),
             mount_base=os.path.dirname(get_mnt_dir(img)),
-            partition_mounts=get_mountpoints(x))] for x in devices ])
+            partition_mounts=get_mountpoints(x))] for x in devices])
     return dict(devices=devices)
 
 ## BEGIN: low-level graven action protocols
@@ -367,7 +368,7 @@ def umount(lodev:str) -> dict:
             # chan("..error: {}".format(err))
             if 'not mounted' in err or 'Invalid argument' in err:
                 result[p] = 'NOT_MOUNTED'
-                col=yellow
+                col = yellow
             elif 'target is busy' in err:
                 result[p] = 'BUSY'
                 col = red
