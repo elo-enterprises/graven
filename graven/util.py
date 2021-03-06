@@ -83,7 +83,7 @@ LOGGER = get_logger(__name__)
 
 def invoke(cmd=None, stdin='', interactive=False, large_output=False, log_command=True, environment={}, log_stdin=True, system=False):
     """
-    helper/boilerplatefor running shell commands.  this is a replacement
+    helper / boilerplatefor running shell commands.  this is a replacement
     for the usual fabric/invoke/subprocess/os module incantations, which
     either have lots of dependencies, or aren't easy to use and don't always
     work that well with pipes
@@ -231,10 +231,16 @@ def find_partition_devs(lodev:str):
     result = result.stdout.split('\n')
     return [_.strip() for _ in result if _.strip()]
 
-def get_mountpoints(lodev:str) -> list:
-    """ returns any places where this lodev is already mounted """
+def get_mountpoints(lodev:str, strict=True) -> list:
+    """
+    returns any places where this lodev is already mounted
+    when `strict` is true, this returns only the mountpoints managed by graven
+    """
     partitions = psutil.disk_partitions()
-    return [p.mountpoint for p in partitions if p.device.startswith(lodev)]
+    tmp = [p.mountpoint for p in partitions if p.device.startswith(lodev)]
+    if strict:
+        tmp = [mp for mp in tmp if '.graven' in mp]
+    return tmp
 
 # FIXME: fxn not reliable
 # maybe instead : grep -H . /sys/block/sda/{capability,uevent,removable,device/{model,type,vendor,uevent}}
@@ -256,9 +262,9 @@ def _clean_dev_name(dev:str):
 def assert_removable(dev:str):
     """
     asserts device is removable.
-    (this might only work with recent ubuntu)
+    (WARNING: this might only work with recent ubuntu)
     """
-    dev=_clean_dev_name(dev)
+    dev = _clean_dev_name(dev)
     fname = '/sys/block/{}/removable'.format(dev)
     with open(fname, 'r') as fhandle:
         contents = fhandle.read().strip()
@@ -315,6 +321,13 @@ def detach(lodev:str) -> dict:
     LOGGER.warning("detaching {}: {}".format(
         lodev, col(result[lodev])))
     return result
+
+def get_image(url:str) -> dict:
+    """
+    a helper for grabbing images from URLs,
+    automatically decompressing them if necessary
+    and using the graven cache
+    """
 
 def attach(img:str, **kargs) -> str:
     """
