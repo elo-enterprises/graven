@@ -304,12 +304,28 @@ def ls(img=None, **kargs):
     Returns information for given img, including number of partitions,
     current associated loop-devices, mounts.
     """
+    def sizeof_fmt(num, suffix='B'):
+        # https://stackoverflow.com/questions/1094841/get-human-readable-version-of-file-size
+        for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
     from graven.f_disk import list as flist
-    return flist(img)
-    # import IPython; IPython.embed()
-    # return dict(
-    #     file=os.path.abspath(path),
-    # )
+    partitions = flist(img)
+    st_size = os.stat(img).st_size
+    # os.stat_result(st_mode=33188, st_ino=6419862, st_dev=16777220, st_nlink=1, st_uid=501, st_gid=20, st_size=1564, st_atime=1584299303, st_mtime=1584299400, st_ctime=1584299400)
+    out = dict(
+        partitions=partitions,
+        metadata=dict(
+            bootable=any([x['bootable'] for x in partitions]),
+            partition_count=len(partitions),
+            partition_types=list(set([x['filesystem'] for x in partitions])),
+            size=st_size,
+            human=dict(
+                size=sizeof_fmt(st_size),
+            )))
+    return { os.path.abspath(img): out }
 
 def split(img, **kargs):
     """
