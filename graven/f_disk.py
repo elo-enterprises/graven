@@ -1,6 +1,7 @@
 ###
 #
 ###
+import os
 import parted
 
 def list(img, **kargs):
@@ -25,14 +26,14 @@ def list(img, **kargs):
                          partition.type,
                          partition.fileSystem))
     out = []
-    for parts in partlist:
-        pdict = {}
+    for index,parts in enumerate(partlist):
+        pdict = dict(index=index)
         (partition, path, bootable, start, end, length, ty, fs) = parts
         bootflag = '*' if bootable else ''
         fs_type = get_type(partition, fs)
         pdict.update(
-            system=fs_type, path=path,
-            bootable=bootable, start=start, end=end, length=length, ty=ty)
+            filesystem=fs_type, path=path,
+            bootable=bootable, start=start, end=end, length=length, type=ty,)
         out.append(pdict)
     return out
 
