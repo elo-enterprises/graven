@@ -1,2 +1,2 @@
-flake8
-j2cli
+pytest
+tox

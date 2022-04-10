@@ -36,7 +36,40 @@ See also:
 ## Features
 
 1) Idempotent: mounting a already-mounted image gives no result (no error, no redundant mount)
-2) Detailed, machine-friendly output that describes partitions, mountpoints, and the original image
+**Detailed, human/api/machine-friendly json output that describes partitions, mountpoints, and the original image:**
+
+```
+sudo `which graven` ls images/ubuntu-18.04.5-preinstalled-server-arm64+raspi4.img
+{
+  "image": {
+    "path": "/tmp/images/ubuntu-18.04.5-preinstalled-server-arm64+raspi4.img",
+    "size_human": "2.5GiB",
+    "size": 2653289472,
+    "partitions": [
+      {
+        "index": 0,
+        "filesystem": "fat32",
+        "path": "/tmp/images/ubuntu-18.04.5-preinstalled-server-arm64+raspi4.img1",
+        "bootable": true,
+        "start": 2048,
+        "end": 526335,
+        "length": 524288,
+        "type": 0
+      },
+      {
+        "index": 1,
+        "filesystem": "ext4",
+        "path": "/tmp/images/ubuntu-18.04.5-preinstalled-server-arm64+raspi4.img2",
+        "bootable": false,
+        "start": 526336,
+        "end": 5182171,
+        "length": 4655836,
+        "type": 0
+      }
+    ]
+  }
+}
+```
 
 ## Requirements
 
@@ -63,6 +96,7 @@ Options:
   --help  Show this message and exit.
 
 Commands:
+  block
   cache     Caches IMG in graven work dir (to avoid in-place changes)
   clean     cleans unused internal mount directories
   copy      Copies SRC_PATH into img@ dest_path
@@ -74,6 +108,7 @@ Commands:
   status    Returns status, including graven-managed mounts, cache, etc
   umount    Unmounts an IMG from optional path.
   versions  Returns version info for graven, libparted, etc
+  b         ALIAS for `block`
   cp        ALIAS for `copy`
   d         ALIAS for `detach`
   fl        ALIAS for `flash`
@@ -82,6 +117,8 @@ Commands:
   st        ALIAS for `status`
   stat      ALIAS for `status`
   u         ALIAS for `umount`
+  w         ALIAS for `block`
+  wait      ALIAS for `block`
 ```
 
 ## Development Notes
@@ -98,3 +135,4 @@ user@host[virtualenv]$ sudo `which graven` ...graven subcommands...
 
 * Ansible integration or just examples, for provisioning on top of base images
 * Cloud-init integration, for pushing [nocloud configuration](https://cloudinit.readthedocs.io/en/latest/topics/datasources/nocloud.html) into boot partitions of base images (Ubuntu now supports this out of the box!)
+* Graven-get-image commands, featuring automatic usage of the cache folders and automatic decompression

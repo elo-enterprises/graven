@@ -12,3 +12,7 @@ img_maybe = click.argument('img', type=click.Path(exists=True), nargs=-1)
 src_path = click.argument('src_path', type=click.Path(exists=True), nargs=1)
 dest_path = click.argument('dest_path', type=click.Path(exists=False), nargs=1)
 mountpoint_maybe = click.argument('mountpoint', nargs=-1)
+until = click.option('--until', type=click.Choice([
+    'MEDIA_REMOVED', 'MEDIA_INSERTED',
+    # 'UMOUNT', 'MOUNT'
+    ]))

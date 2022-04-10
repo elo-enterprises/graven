@@ -161,6 +161,30 @@ def graven_mnt_base():
         return fatal_error(msg)
     return out
 
+def _get_action_file():
+    """ """
+    tmp = os.path.join(graven_home(), 'actions.json')
+    if not os.path.exists(tmp):
+        msg="action queue at {} does not exist, creating it"
+        LOGGER.debug(msg.format(tmp))
+        with open(tmp,'w') as fhandle:
+            fhandle.write(json.dumps({}))
+    return tmp
+def actions_in_progress():
+    """ """
+    afile = _get_action_file()
+    with open(afile, 'r') as fhandle:
+        actions = json.loads(fhandle.read())
+    return actions
+def update_actions(**kargs):
+    tmp = actions_in_progress()
+    tmp.update(kargs)
+    afile = _get_action_file()
+    with open(afile, 'w') as fhandle:
+        fhandle.write(json.dumps(tmp))
+    return tmp
+
+
 def get_cache_dir():
     """ """
     home = graven_home()
@@ -196,11 +220,13 @@ def get_mounted_images(debug=False) -> dict:
             matches = [x for x in devs['loopdevices'] if x['name'] == lodev]
             for m in matches:
                 m_lodev = m['name']
-                m_img = m['back-file']
+                m_img = m['back-file'].split(' ')[0]
                 inf = mount_info(m_img)
+                tmp = inf['devices']
+                assert m_lodev in tmp,tmp.keys()
                 out[m_img] = dict(
                     device=m_lodev,
-                    **inf['devices'][m_lodev])
+                    **tmp[m_lodev])
         else:
             is_mounted = False
         chan("  checking if {} is mounted.. {}".format(mp, is_mounted))

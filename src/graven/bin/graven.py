@@ -41,6 +41,15 @@ list = ApiWrapper(
         cli.args.img,
     ])
 
+block = ApiWrapper(
+    fxn=api.block,
+    aliases=['wait', 'b', 'w'],
+    extra_options=[
+        # cli.args.img,
+        click.argument('device_or_file', nargs=1),
+        cli.args.until,
+    ])
+
 clean = ApiWrapper(
     fxn=api.clean,
     aliases=[],

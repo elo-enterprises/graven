@@ -38,6 +38,58 @@ def copy(src_path=None, dest_path=None, img=None, partition=1, **kargs):
     out.append(tmp)
     return out
 
+def block(device_or_file, until=None, disk=None, media=None, delta=2, **kargs):
+    """ """
+    LOGGER.debug("Blocking until condition `{}` is met".format(until))
+    # validation
+    if until in ['MEDIA_INSERTED', 'MEDIA_REMOVED']:
+        disk = device_or_file
+        assert disk.startswith('/dev/'), 'disk name should start with /dev!'
+        media = disk[len('/dev/'):]
+
+    if until=='MEDIA_INSERTED':
+        msg = "Waiting for media at `{}` to be inserted (polling every {}s)"
+        LOGGER.debug(msg.format(media, delta))
+        count = 0
+        cmd_t = 'lsblk -do name,tran | grep {} > /dev/null'
+        cmd = cmd_t.format(media)
+        LOGGER.debug("Will be using this command:")
+        LOGGER.debug("  {}".format(cmd))
+        while True:
+            if os.system(cmd) == 0:
+                LOGGER.debug("Media at `{}` appears to be inserted".format(disk))
+                break
+            else:
+                msg = ".. ({}) media at `{}` appears absent"
+                LOGGER.debug(msg.format(count, disk))
+                time.sleep(delta)
+                count += 1
+
+    elif until=='MEDIA_REMOVED':
+        disk = device_or_file
+        assert disk.startswith('/dev/'), 'disk name should start with /dev!'
+        media = disk[len('/dev/'):]
+        msg = "Waiting for media at `{}` to be removed (polling every {}s)"
+        LOGGER.debug(msg.format(media, delta))
+        count = 0
+        cmd_t = 'lsblk -do name,tran | grep {} > /dev/null'
+        cmd = cmd_t.format(media)
+        LOGGER.debug("Will be using this command:")
+        LOGGER.debug("  {}".format(cmd))
+        while True:
+            if os.system(cmd) != 0:
+                LOGGER.debug("Media at `{}` appears to be gone!".format(disk))
+                break
+            else:
+                msg = ".. ({}) media at `{}` appears to still be present"
+                LOGGER.debug(msg.format(count, disk))
+                time.sleep(delta)
+                count += 1
+    else:
+        err = "Unsupported event type for until!"
+        LOGGER.error(err)
+        raise SystemExit(err)
+
 def flash(src_path=None, dest_path=None, debug=None, force=None, dry_run=None, block_size='5M', **kargs):
     """
     Flashes IMG (or SRC_DEV) to DEST_DEV
@@ -57,7 +109,19 @@ def flash(src_path=None, dest_path=None, debug=None, force=None, dry_run=None, b
         msg = "\nPausing {}s before writing to `{}` using command:\n\n  {}"
         LOGGER.warning(msg.format(DEFAULT_PAUSE, dest_path, util.bold(cmd)))
         time.sleep(5)
+        flashing = util.actions_in_progress().get('flashing', [])
+        action = dict(
+                    dest=dest_path, src=src_path,
+                    error=False, status="PENDING",)
+        LOGGER.debug("Adding action to queue")
+        util.update_actions(flashing=flashing + [action])
         tmp = util.invoke(cmd, system=True)
+        LOGGER.debug("Popping action from queue")
+        flashing = util.actions_in_progress().get('flashing', [])
+        flashing = [x for x in flashing if not
+            (x.get('src')==src_path and x.get('dest')==dest_path)
+        ]
+        util.update_actions(flashing=flashing)
         if tmp.succeeded:
             action = dict(flash=dict(
                     dest=dest_path, src=src_path,
@@ -302,6 +366,7 @@ def status(hint=None, **kargs):
             mounted=util.get_mounted_images(),
             # attached=util.get_attached_images(),
         ),
+        actions=util.actions_in_progress(),
     )
 
 def ls(img=None, **kargs):
