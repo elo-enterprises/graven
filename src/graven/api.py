@@ -39,7 +39,7 @@ def copy(src_path=None, dest_path=None, img=None, partition=1, **kargs):
     return out
 
 def block(device_or_file, until=None, disk=None, media=None, delta=2, **kargs):
-    """ """
+    """ Block until {MEDIA_INSERTED|MEDIA_REMOVED} """
     LOGGER.debug("Blocking until condition `{}` is met".format(until))
     # validation
     if until in ['MEDIA_INSERTED', 'MEDIA_REMOVED']:

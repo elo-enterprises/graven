@@ -1,0 +1,41 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=42", "calver","build<0.10.0"]
+
+[tool.black]
+skip-string-normalization = true
+
+# [tool.coverage.paths]
+# source = ["src",]
+#
+# [tool.coverage.run]
+# branch = true
+# source = ["src"]
+# omit = ["*/.tmp/*"]
+#
+# [tool.coverage.report]
+# show_missing = true
+# fail_under = 1
+# exclude_lines =
+#     pragma: no cover
+#     def __repr__
+#     if self.debug:
+#     if settings.DEBUG
+#     raise AssertionError
+#     raise NotImplementedError
+#     if 0:
+#     if __name__ == .__main__.:
+#     if TYPE_CHECKING:
+#     class .*\bProtocol\):
+#     @(abc\.)?abstractmethod
+
+[tool.mypy]
+disallow_untyped_defs = true
+show_error_codes = true
+no_implicit_optional = false
+warn_return_any = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = "graven.*"
+disable_error_code = ["union-attr", "arg-type","assignment", "return-value", "no-any-return", "index", "attr-defined"]
