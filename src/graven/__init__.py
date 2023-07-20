@@ -5,5 +5,5 @@
 # be triggered by local development.
 try:
     from ._version import __version__  # noqa
-except ImportError:
+except (ImportError, AttributeError):
     __version__ = "0.0.0+local"
